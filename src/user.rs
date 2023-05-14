@@ -2,18 +2,15 @@ use rand::Rng;
 use serde::Serialize;
 use uuid::Uuid;
 
-use crate::{
-    person::{PERSON_FIRST_NAMES, PERSON_LAST_NAMES},
-    Random,
-};
+use crate::{person::Person, ratting::Rate, Random};
 
 #[derive(Serialize)]
 #[serde(rename = "usuario", rename_all = "camelCase")]
 pub struct User {
     #[serde(rename = "_id")]
-    id: Uuid,
+    pub id: Uuid,
     #[serde(rename = "nome")]
-    name: String,
+    pub name: String,
     #[serde(rename = "dataNascimento")]
     birth_date: chrono::NaiveDate,
     #[serde(rename = "email")]
@@ -21,35 +18,16 @@ pub struct User {
     #[serde(rename = "senha")]
     password: String,
     #[serde(rename = "avaliacoes")]
-    ratings: Vec<Ratted>,
-}
-
-#[derive(Serialize)]
-#[serde(rename = "avaliacao", rename_all = "camelCase")]
-struct Ratted {
-    #[serde(rename = "_id")]
-    id: Uuid,
-    #[serde(rename = "filme")]
-    movie: Uuid,
-    #[serde(rename = "nota")]
-    rating: u8,
+    rated: Vec<Rate>,
 }
 
 impl Random for User {
     fn random() -> Self {
-        let name = PERSON_FIRST_NAMES[rand::thread_rng().gen_range(0..PERSON_FIRST_NAMES.len())];
-        let last_name = PERSON_LAST_NAMES[rand::thread_rng().gen_range(0..PERSON_LAST_NAMES.len())];
-
-        let email = format!(
-            "{}.{}.{}@imdb.com",
-            name.to_lowercase(),
-            last_name.to_lowercase(),
-            rand::thread_rng().gen_range(0..100)
-        );
+        let (name, email) = Person::generate_random_name_email();
 
         Self {
             id: Uuid::new_v4(),
-            name: format!("{} {}", name, last_name),
+            name,
             birth_date: chrono::NaiveDate::from_ymd_opt(
                 rand::thread_rng().gen_range(1900..=2020),
                 rand::thread_rng().gen_range(1..=12),
@@ -62,7 +40,7 @@ impl Random for User {
                 .take(10)
                 .map(char::from)
                 .collect(),
-            ratings: Vec::new(),
+            rated: Vec::new(),
         }
     }
 }

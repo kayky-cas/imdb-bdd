@@ -2,7 +2,7 @@ use rand::Rng;
 use serde::Serialize;
 use uuid::Uuid;
 
-use crate::{genre::Genre, worker::Worker, Random, RandomVec};
+use crate::{genre::Genre, work::Work, Random, RandomVec};
 
 pub const MOVIE_TILTES: [&str; 20] = [
     "O Poderoso Chefão",
@@ -54,11 +54,11 @@ pub struct Movie {
     #[serde(rename = "titulo")]
     pub title: String,
     #[serde(rename = "lancamento")]
-    release: chrono::NaiveDate,
+    pub release: chrono::NaiveDate,
     #[serde(rename = "genero")]
     genre: Genre,
     #[serde(rename = "trabalhadores")]
-    workers: Vec<Worker>,
+    workers: Vec<Work>,
 }
 
 impl Random for Movie {
@@ -71,7 +71,7 @@ impl Random for Movie {
                 MOVIE_SUBTITLE[rand::thread_rng().gen_range(0..MOVIE_SUBTITLE.len())]
             ),
             release: chrono::NaiveDate::from_ymd_opt(
-                rand::thread_rng().gen_range(1900..2021),
+                rand::thread_rng().gen_range(1920..2030),
                 rand::thread_rng().gen_range(1..13),
                 rand::thread_rng().gen_range(1..29),
             )
@@ -83,7 +83,7 @@ impl Random for Movie {
 }
 
 impl Movie {
-    pub fn add_worker(&mut self, worker: Worker) {
+    pub fn append_worker(&mut self, worker: Work) {
         self.workers.push(worker);
     }
 }

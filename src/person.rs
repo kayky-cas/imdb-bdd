@@ -1,12 +1,10 @@
-use crate::{Random, RandomVec};
+use crate::{work::Work, Random};
 use chrono::Datelike;
 use rand::Rng;
 use serde::Serialize;
 use uuid::Uuid;
 
-use crate::movie::Movie;
-
-pub const PERSON_FIRST_NAMES: [&str; 30] = [
+const PERSON_FIRST_NAMES: [&str; 30] = [
     "John",
     "Mary",
     "Robert",
@@ -39,7 +37,7 @@ pub const PERSON_FIRST_NAMES: [&str; 30] = [
     "Dorothy",
 ];
 
-pub const PERSON_LAST_NAMES: [&str; 30] = [
+const PERSON_LAST_NAMES: [&str; 30] = [
     "Smith",
     "Johnson",
     "Williams",
@@ -73,33 +71,6 @@ pub const PERSON_LAST_NAMES: [&str; 30] = [
 ];
 
 #[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-pub enum Role {
-    #[serde(rename = "ator")]
-    Actor(String),
-    #[serde(rename = "diretor")]
-    Director,
-    #[serde(rename = "produtor")]
-    Producer,
-    #[serde(rename = "roteirista")]
-    Writer,
-    #[serde(rename = "editor")]
-    Editor,
-    #[serde(rename = "cinematografo")]
-    Cinematographer,
-    #[serde(rename = "compositor")]
-    Composer,
-    #[serde(rename = "figurinista")]
-    CostumeDesigner,
-    #[serde(rename = "desenhista de producao")]
-    ProductionDesigner,
-    #[serde(rename = "maquiador")]
-    MakeupArtist,
-    #[serde(rename = "outro")]
-    Other,
-}
-
-#[derive(Serialize)]
 #[serde(rename = "pessoa", rename_all = "camelCase")]
 pub struct Person {
     #[serde(rename = "_id")]
@@ -111,31 +82,8 @@ pub struct Person {
     #[serde(rename = "oscars")]
     pub oscars: Vec<usize>,
     #[serde(rename = "trabalhos")]
-    works: Vec<Works>,
+    works: Vec<Work>,
 }
-
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-enum Media {
-    #[serde(rename = "filme")]
-    Movie,
-    #[serde(rename = "episodio")]
-    Episode,
-}
-
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Works {
-    #[serde(rename = "_id")]
-    id: Uuid,
-    #[serde(rename = "tipo")]
-    media: Media,
-    #[serde(rename = "titulo")]
-    title: String,
-    #[serde(rename = "papel")]
-    role: Role,
-}
-
 impl Random for Person {
     fn random() -> Self {
         let birth_date = chrono::NaiveDate::from_ymd_opt(
@@ -156,11 +104,7 @@ impl Random for Person {
 
         Person {
             id: Uuid::new_v4(),
-            name: format!(
-                "{} {}",
-                PERSON_FIRST_NAMES[rand::thread_rng().gen_range(0..30)],
-                PERSON_LAST_NAMES[rand::thread_rng().gen_range(0..30)]
-            ),
+            name: Person::generate_random_name_email().0,
             birth_date,
             oscars,
             works: Vec::new(),
@@ -168,19 +112,23 @@ impl Random for Person {
     }
 }
 
-impl Works {
-    pub fn new(movie: Movie, role: Role) -> Self {
-        Self {
-            media: Media::Movie,
-            id: movie.id,
-            title: movie.title,
-            role,
-        }
-    }
-}
-
 impl Person {
-    pub fn append_work(&mut self, movie: Movie, role: Role) {
-        self.works.push(Works::new(movie, role));
+    pub fn append_work(&mut self, work: Work) {
+        self.works.push(work);
+    }
+
+    pub fn generate_random_name_email() -> (String, String) {
+        let name = PERSON_FIRST_NAMES[rand::thread_rng().gen_range(0..PERSON_FIRST_NAMES.len())];
+        let last_name = PERSON_LAST_NAMES[rand::thread_rng().gen_range(0..PERSON_LAST_NAMES.len())];
+
+        (
+            format!("{} {}", name, last_name),
+            format!(
+                "{}.{}.{}@imdb.com",
+                name.to_lowercase(),
+                last_name.to_lowercase(),
+                rand::thread_rng().gen_range(0..100)
+            ),
+        )
     }
 }
