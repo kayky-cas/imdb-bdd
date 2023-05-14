@@ -179,14 +179,8 @@ impl Works {
     }
 }
 
-impl RandomVec<Person> for Person {
-    fn random_vec(len: usize) -> Vec<Person> {
-        let mut vec = Vec::new();
-
-        for _ in 0..len {
-            vec.push(Person::random());
-        }
-
-        vec
+impl Person {
+    pub fn append_work(&mut self, movie: Movie, role: Role) {
+        self.works.push(Works::new(movie, role));
     }
 }

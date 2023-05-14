@@ -1,9 +1,8 @@
-use crate::{Random, RandomVec};
 use rand::Rng;
 use serde::Serialize;
 use uuid::Uuid;
 
-use crate::{genre::Genre, worker::Worker};
+use crate::{genre::Genre, worker::Worker, Random, RandomVec};
 
 pub const MOVIE_TILTES: [&str; 20] = [
     "O Poderoso Chefão",
@@ -64,14 +63,13 @@ pub struct Movie {
 
 impl Random for Movie {
     fn random() -> Self {
-        let mut title =
-            MOVIE_TILTES[rand::thread_rng().gen_range(0..MOVIE_TILTES.len())].to_string();
-
-        title.push_str(MOVIE_SUBTITLE[rand::thread_rng().gen_range(0..MOVIE_SUBTITLE.len())]);
-
         Self {
             id: Uuid::new_v4(),
-            title,
+            title: format!(
+                "{} {}",
+                MOVIE_TILTES[rand::thread_rng().gen_range(0..MOVIE_TILTES.len())],
+                MOVIE_SUBTITLE[rand::thread_rng().gen_range(0..MOVIE_SUBTITLE.len())]
+            ),
             release: chrono::NaiveDate::from_ymd_opt(
                 rand::thread_rng().gen_range(1900..2021),
                 rand::thread_rng().gen_range(1..13),
@@ -84,14 +82,8 @@ impl Random for Movie {
     }
 }
 
-impl RandomVec<Movie> for Movie {
-    fn random_vec(size: usize) -> Vec<Self> {
-        let mut movies = Vec::with_capacity(size);
-
-        for _ in 0..size {
-            movies.push(Self::random());
-        }
-
-        movies
+impl Movie {
+    pub fn add_worker(&mut self, worker: Worker) {
+        self.workers.push(worker);
     }
 }

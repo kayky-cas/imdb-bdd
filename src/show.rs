@@ -1,4 +1,4 @@
-use crate::Random;
+use crate::{Random, RandomVec};
 use rand::Rng;
 use serde::Serialize;
 use uuid::Uuid;
@@ -48,7 +48,7 @@ const EPISODES_TITLES: [&str; 15] = [
 
 #[derive(Serialize)]
 #[serde(rename = "serie", rename_all = "camelCase")]
-struct Show {
+pub struct Show {
     #[serde(rename = "_id")]
     id: Uuid,
     #[serde(rename = "titulo")]
@@ -87,6 +87,23 @@ impl Random for Episode {
             )
             .unwrap(),
             workers: vec![],
+        }
+    }
+}
+
+impl Random for Show {
+    fn random() -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            title: SHOWS_TITLES[rand::thread_rng().gen_range(0..SHOWS_TITLES.len())].to_string(),
+            release: chrono::NaiveDate::from_ymd_opt(
+                rand::thread_rng().gen_range(1900..=2021),
+                rand::thread_rng().gen_range(1..=12),
+                rand::thread_rng().gen_range(1..=28),
+            )
+            .unwrap(),
+            genre: Genre::random(),
+            episodes: RandomVec::random_vec(rand::thread_rng().gen_range(1..=20)),
         }
     }
 }
